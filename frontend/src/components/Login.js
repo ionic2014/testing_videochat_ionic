@@ -1,0 +1,38 @@
+import React, { useState } from "react";
+import { Box, Paper, Typography, TextField, Button } from "@mui/material";
+
+export default function Login({ onLogin, onRegister, onGuest }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+
+  const handleLogin = async () => {
+    setError("");
+    try {
+      const res = await fetch(process.env.REACT_APP_BACKEND_URL + "/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password, ip: "" })
+      });
+      const out = await res.json();
+      if (out.error) setError(out.error);
+      else onLogin(out);
+    } catch (e) {
+      setError("Errore di connessione");
+    }
+  };
+
+  return (
+    <Box sx={{display:"flex",justifyContent:"center",alignItems:"center",height:"100vh",background:"linear-gradient(135deg, #181c24 60%, #1976d2 150%)"}}>
+      <Paper elevation={5} sx={{p:4,minWidth:"330px",borderRadius:"18px",background:"#22283b"}}>
+        <Typography variant="h5" sx={{mb:2}}>Accedi alla Videochat</Typography>
+        <TextField fullWidth label="Username" variant="outlined" value={username} onChange={e=>setUsername(e.target.value)} sx={{mb:2}} />
+        <TextField fullWidth label="Password" type="password" variant="outlined" value={password} onChange={e=>setPassword(e.target.value)} sx={{mb:2}} />
+        {error && <Typography color="error" sx={{mb:2}}>{error}</Typography>}
+        <Button fullWidth variant="contained" color="primary" onClick={handleLogin} sx={{mb:2}}>Accedi</Button>
+        <Button fullWidth variant="outlined" onClick={onRegister} sx={{mb:1}}>Registrati</Button>
+        <Button fullWidth variant="text" onClick={onGuest}>Accesso Guest</Button>
+      </Paper>
+    </Box>
+  );
+}
